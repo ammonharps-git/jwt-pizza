@@ -114,3 +114,59 @@ test("purchase with login", async ({ page }) => {
   // Check balance
   await expect(page.getByText("0.008")).toBeVisible();
 });
+
+test("logout", async ({ page }) => {
+  await page.route("*/**/api/auth", async (route) => {
+    const loginReq = { email: "d@jwt.com", password: "a" };
+    const loginRes = {
+      user: {
+        id: 3,
+        name: "Kai Chen",
+        email: "d@jwt.com",
+        roles: [{ role: "diner" }],
+      },
+      token: "abcdef",
+    };
+    expect(route.request().method()).toBe("PUT");
+    expect(route.request().postDataJSON()).toMatchObject(loginReq);
+    await route.fulfill({ json: loginRes });
+  });
+
+  await page.goto("/login");
+
+  // Login
+  await page.getByRole("button", { name: "Login" }).click();
+  await page.getByRole("textbox", { name: "Email address" }).fill("d@jwt.com");
+  await page.getByRole("textbox", { name: "Email address" }).press("Tab");
+  await page.getByRole("textbox", { name: "Password" }).fill("a");
+  await page.getByRole("button", { name: "Login" }).click();
+
+  // await page.waitForNavigation({ waitUntil: "domcontentloaded" }); // waits for page load to finish
+
+  await page.route("*/**/api/auth", async (route) => {
+    expect(route.request().method()).toBe("DELETE");
+    await route.fulfill();
+  });
+
+  await page.getByRole("link", { name: "Logout" }).click();
+});
+
+test("History", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("link", { name: "History" }).click();
+  await expect(page.getByRole("heading")).toContainText("Mama Rucci, my my");
+});
+
+test("Register", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("link", { name: "Register" }).click();
+  await page.getByRole("textbox", { name: "Full name" }).click();
+  await page.getByRole("textbox", { name: "Full name" }).fill("testuser1");
+  await page.getByRole("textbox", { name: "Full name" }).press("Tab");
+  await page
+    .getByRole("textbox", { name: "Email address" })
+    .fill("test@test.com");
+  await page.getByRole("textbox", { name: "Email address" }).press("Tab");
+  await page.getByRole("textbox", { name: "Password" }).fill("testing");
+  await page.getByRole("button", { name: "Register" }).click();
+});
