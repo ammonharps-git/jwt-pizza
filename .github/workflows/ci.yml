@@ -51,7 +51,7 @@ jobs:
           curl -s -X POST "https://badge.cs329.click/badge/${{ github.repository_owner }}/jwtpizzacoverage?label=Coverage&value=$coverage%25&color=$color" -H "authorization: bearer ${{ secrets.FACTORY_API_KEY }}" -o /dev/null
           echo "Final curl command: curl -s -X POST \"https://badge.cs329.click/badge/${{ github.repository_owner }}/jwtpizzacoverage?label=Coverage&value=$coverage%25&color=$color\" -H \"authorization: FACTORY_API_KEY\" -o /dev/null"
           echo "Finished."
-  deploy:
+  deploy2:
     needs: build
     permissions:
       id-token: write
